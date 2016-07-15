@@ -69,8 +69,12 @@ setInterval(getMarketData, 15 * 60 * 1000);
 function getMarketData(regular) {
   var nameArr = [
     'MLG Columbus 2016 Challengers (Holo-Foil)',
-    'Cologne 2016 Challengers (Holo-Foil)'
+    'Cologne 2016 Challengers (Holo-Foil)',
+    'Cologne 2016 Legends (Holo-Foil)'
   ];
+
+  var highPriceArr = [20, 15, 15];
+  var lowPriceArr = [15, 7, 7];
   
   var todayTs = Date.parse((new Date()).toDateString());
 
@@ -109,8 +113,7 @@ function getMarketData(regular) {
     }
     var basePrice = historyPrice[todayTs];
     needReport = resultArr.some(function(v, i){
-      let delta = Math.abs(v[priceField] - basePrice[i][priceField]);
-      return delta / basePrice[i][priceField] >= 0.25;
+      return priceRule(v[priceField], basePrice[i][priceField], highPriceArr[i], lowPriceArr[i]);
     });
     if (needReport) {
       sendMail(dealWithMailData(basePrice, resultArr, nameArr));
@@ -119,7 +122,7 @@ function getMarketData(regular) {
       sendMail(dealWithMailData(basePrice, resultArr, nameArr, true));
     }
     console.log(resultArr);
-    console.log(new Date());
+    console.log((new Date()).toLocaleString());
   })
   .catch(function(err){
     console.log(err);
@@ -189,6 +192,16 @@ function scheduleMail() {
   var j = schedule.scheduleJob(rule, function(){
     getMarketData(true);
   });
+}
+
+function priceRule(curPriceStr, pastPriceStr, highLine, lowLine) {
+  var curPrice = curPriceStr.split(' ')[1];
+  var pastPrice = pastPriceStr.split(' ')[1];
+  var delta = Math.abs(curPrice - pastPrice);
+  var seesaw = delta / pastPrice >= 0.25;
+  var high = curPrice >= highLine
+  var low = curPrice <= lowLine
+  return seesaw || high || low
 }
 
 scheduleMail();
