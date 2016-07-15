@@ -119,6 +119,7 @@ function getMarketData(regular) {
       sendMail(dealWithMailData(basePrice, resultArr, nameArr, true));
     }
     console.log(resultArr);
+    console.log(new Date());
   })
   .catch(function(err){
     console.log(err);
